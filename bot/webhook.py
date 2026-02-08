@@ -129,7 +129,7 @@ class Webhook:
         return json.dumps(data, indent=4)
 
 
-    def post(self, attempt=1):
+    def post(self, attempt=1, max_attempts=5):
         """Send the JSON formated object to the specified `self.url`."""
 
         headers = {'Content-Type': 'application/json'}
@@ -139,14 +139,26 @@ class Webhook:
         if result.status_code == 429:
             log.warning('Received 429 from Discord')
             time.sleep(1)
-            if attempt < 6:
+            if attempt < max_attempts:
                 log.debug('Retrying request that was rate-limited (attempt {})'.format(attempt))
                 self.post(attempt=attempt + 1)
             else:
                 log.error('Could not send webhook, rate-limited, tried {} times'.format(attempt))
                 return None
         elif result.status_code == 400:
-            log.error('Could not send webhook, client error')
+            response_data = None
+            try:
+                response_data = result.json()
+            except:
+                response_data = {"error": "Could not decode JSON response", "raw_text": result.text}
+            log.warning('Could not send webhook, client error')
+            time.sleep(1)
+            if attempt < max_attempts:
+                log.debug('Retrying request that failed (attempt {})'.format(attempt))
+                self.post(attempt=attempt + 1)
+            else:
+                log.error('Could not send webhook, client error, tried {0} times: {1}'.format(attempt, json.dumps(response_data)))
+                return None
             return None
         else:
             log.debug('Sent webhook to Discord. Received {}'.format(result.status_code))
