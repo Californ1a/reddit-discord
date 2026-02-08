@@ -8,8 +8,9 @@ import bot
 
 # Init logging
 l_h = colorlog.StreamHandler()
-l_h.setFormatter(colorlog.ColoredFormatter(
-    '%(log_color)s%(levelname)s:%(name)s: %(message)s',
+formatter = colorlog.ColoredFormatter(
+    '[%(asctime)s] %(log_color)s%(levelname)s:%(name)s: %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S',
     log_colors={
         'DEBUG': 'cyan',
         'INFO': 'green',
@@ -17,7 +18,11 @@ l_h.setFormatter(colorlog.ColoredFormatter(
         'ERROR': 'red',
         'CRITICAL': 'red',
     },
-))
+)
+
+formatter.converter = time.gmtime
+l_h.setFormatter(formatter)
+
 log = logging.getLogger('bot')
 log.addHandler(l_h)
 log.setLevel(logging.DEBUG)
