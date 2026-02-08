@@ -46,7 +46,7 @@ class RedditBot:
                 for c in c_stream:
                     if c is None:
                         break
-                    if any(u.lower() == c.author.name.lower() for u in self.config.ignore_list):
+                    if any(c.author and c.author.name and u.lower() == c.author.name.lower() for u in self.config.ignore_list):
                         break
                     for h in self.config.hooks:
                         rgx_match = re.findall(h.regex, c.body)
@@ -64,7 +64,7 @@ class RedditBot:
                 for post in s_stream:
                     if post is None:
                         break
-                    if any(u.lower() == post.author.name.lower() for u in self.config.ignore_list):
+                    if any(post.author and post.author.name and u.lower() == post.author.name.lower() for u in self.config.ignore_list):
                         break
                     check = [post.url, post.title, post.selftext]
 
@@ -124,7 +124,11 @@ class RedditBot:
             log.warning('Received data that was not a submission or comment: {0}'.format(data))
             return
 
-        embed.set_author(name='{0} on /r/{1}'.format(data.author.name, data.subreddit.display_name), icon=data.subreddit.icon_img, url='https://reddit.com/u/{0}'.format(data.author.name))
+        author_name = 'none'
+        if data.author and data.author.name:
+            author_name = data.author.name
+        
+        embed.set_author(name='{0} on /r/{1}'.format(author_name, data.subreddit.display_name), icon=data.subreddit.icon_img, url='https://reddit.com/u/{0}'.format(author_name))
         embed.set_title(title=p_type, url=url)
         embed.add_field(name='**{0}**'.format(title), value=body[:750] + (body[750:] and '...'))
         embed.set_thumbnail(thumb)
