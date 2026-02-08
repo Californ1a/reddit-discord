@@ -51,15 +51,17 @@ class RedditBot:
                     for h in self.config.hooks:
                         rgx_match = re.findall(h.regex, c.body)
                         if (rgx_match and str(c.subreddit) in h.subreddits):
-                            log.debug('Criteria was matched: {}'.format(rgx_match))
-                            comment_time = datetime.datetime.fromtimestamp(c.created_utc)
-
-                            if (last_time is None) or (comment_time > last_time-datetime.timedelta(minutes=5)):
+                            comment_time = datetime.datetime.fromtimestamp(c.created_utc, datetime.timezone.utc)
+                            log.debug('Criteria was matched ({0}): {1}'.format(comment_time, rgx_match))
+                            
+                            diff_time = last_time-datetime.timedelta(minutes=10)
+                            
+                            if (last_time is None) or (comment_time > diff_time):
                                 # Handle the comment
                                 log.info("New comment: {0} ({0.subreddit.display_name})".format(c))
                                 self.handle_comment(c, h)
                             else:
-                                log.debug('Skipping. Comment time was over 5 mins before last check.')
+                                log.debug('Skipping. Comment time was over 10 mins before last check ({0}).'.format(comment_time))
 
                 for post in s_stream:
                     if post is None:
@@ -72,14 +74,16 @@ class RedditBot:
                         matching_rgx = [c for c in check if re.findall(h.regex, c)]
 
                         if (matching_rgx and str(post.subreddit) in h.subreddits):  # One or more criteria was matched
-                            log.debug('Criteria was matched: {}'.format(matching_rgx))
-                            post_time = datetime.datetime.fromtimestamp(post.created_utc)
+                            post_time = datetime.datetime.fromtimestamp(post.created_utc, datetime.timezone.utc)
+                            log.debug('Criteria was matched ({0}): {1}'.format(post_time, matching_rgx))
+                            
+                            diff_time = last_time-datetime.timedelta(minutes=10)
 
-                            if (last_time is None) or (post_time > last_time-datetime.timedelta(minutes=5)):
+                            if (last_time is None) or (post_time > diff_time):
                                 log.info("New post: {0.title} ({0.subreddit.display_name})".format(post))
                                 self.handle_post(post, h)
                             else:
-                                log.debug('Skipping. Post time was over 5 mins before last check.')
+                                log.debug('Skipping. Post time was over 10 mins before last check ({0}).'.format(post_time))
             
                 self.save_last_time('data/last_check.txt', datetime.datetime.now(datetime.timezone.utc))
 
