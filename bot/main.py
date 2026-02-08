@@ -114,8 +114,13 @@ class RedditBot:
             p_type = 'Submission'
             url = 'https://old.reddit.com' + data.permalink # data.shortlink
             title = data.title
-            body = data.selftext if data.is_self else data.url
-            thumb = data.thumbnail if not data.is_self else self.config.sub_thumb
+            body = data.selftext if data.selftext and data.selftext.strip() else data.url
+            thumb = self.config.sub_thumb
+            if not data.is_self and data.thumbnail != 'default':
+                thumb = data.thumbnail
+            elif not data.is_self and data.thumbnail == 'default':
+                if hasattr(data, 'preview') == True and 'images' in data.preview:
+                    thumb = data.preview['images'][0]['source']['url']
         elif isinstance(data, praw.models.Comment):
             p_type = 'Comment'
             # Current Reddit interface only supports up to 3 levels of context.
