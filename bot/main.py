@@ -108,7 +108,7 @@ class RedditBot:
 
         if isinstance(data, praw.models.Submission):
             p_type = 'Submission'
-            url = data.shortlink
+            url = 'https://old.reddit.com' + data.permalink # data.shortlink
             title = data.title
             body = data.selftext if data.is_self else data.url
             thumb = data.thumbnail if not data.is_self else self.config.sub_thumb
@@ -116,7 +116,7 @@ class RedditBot:
             p_type = 'Comment'
             # Current Reddit interface only supports up to 3 levels of context.
             # More than 8 or so just doesn't load, 4-n will show context but not the actual linked comment.
-            url = 'https://reddit.com' + data.permalink + '?context=3'
+            url = 'https://old.reddit.com' + data.permalink + '?context=1000'
             title = data.submission.title
             body = data.body
             thumb = self.config.comment_thumb
