@@ -81,7 +81,7 @@ class RedditBot:
                             else:
                                 log.debug('Skipping. Post time was over 5 mins before last check.')
             
-                self.save_last_time('data/last_check.txt', datetime.datetime.utcnow())
+                self.save_last_time('data/last_check.txt', datetime.datetime.now(datetime.timezone.utc))
 
             except Exception as e:
                 if '503' in str(e):  # Reddit's servers are doing some weird shit
