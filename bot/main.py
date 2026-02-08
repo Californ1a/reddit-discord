@@ -50,7 +50,7 @@ class RedditBot:
                         break
                     for h in self.config.hooks:
                         rgx_match = re.findall(h.regex, c.body)
-                        if (rgx_match and str(c.subreddit).lower() in h.subreddits):
+                        if (rgx_match and str(c.subreddit) in h.subreddits):
                             log.debug('Criteria was matched: {}'.format(rgx_match))
                             comment_time = datetime.datetime.fromtimestamp(c.created_utc)
 
@@ -71,7 +71,7 @@ class RedditBot:
                     for h in self.config.hooks:
                         matching_rgx = [c for c in check if re.findall(h.regex, c)]
 
-                        if (matching_rgx and str(post.subreddit).lower() in h.subreddits):  # One or more criteria was matched
+                        if (matching_rgx and str(post.subreddit) in h.subreddits):  # One or more criteria was matched
                             log.debug('Criteria was matched: {}'.format(matching_rgx))
                             post_time = datetime.datetime.fromtimestamp(post.created_utc)
 
