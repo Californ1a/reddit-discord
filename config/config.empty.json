@@ -1,30 +1,28 @@
 {
-    "default_regex": "([Ww]iki(?![\\w/])|[Ww]ikia(?![\\w.])|runescape\\.wikia\\.com|oldschoolrunescape\\.wikia\\.com)",
-    "hooks": [
-        {
-            "url": "",
-            "subreddits": [
-                "runescape"
-            ],
-            "regex": null
-        }
-    ],
-    "reddit": {
-        "client_id": "",
-        "client_secret": "",
-        "client_ua": "",
-        "username": "",
-        "password": ""
-    },
-    "footer": {
-        "text": "Reddit bot by Jayden",
-        "icon": "https://i.imgur.com/S5X2GOw.png"
-    },
-    "thumbnails": {
-        "comment": "https://i.imgur.com/UTOtv5S.png",
-        "text_submission": "https://i.imgur.com/UTOtv5S.png"
-    },
-    "ignore": [
-        "AutoModerator"
-    ]
+	"default_regex": "([Ww]iki(?![\\w/])|[Ww]ikia(?![\\w.])|runescape\\.wikia\\.com|oldschoolrunescape\\.wikia\\.com)",
+	"hooks": [{
+		"url": "",
+		"subreddits": [
+			{ "name": "runescape", "color": 16729344 }
+		],
+		"regex": null
+	}],
+	"reddit": {
+		"client_id": "",
+		"client_secret": "",
+		"client_ua": "",
+		"username": "",
+		"password": ""
+	},
+	"footer": {
+		"text": "Reddit bot by Jayden",
+		"icon": "https://i.imgur.com/S5X2GOw.png"
+	},
+	"thumbnails": {
+		"comment": "https://i.imgur.com/UTOtv5S.png",
+		"text_submission": "https://i.imgur.com/UTOtv5S.png"
+	},
+	"ignore": [
+		"AutoModerator"
+	]
 }

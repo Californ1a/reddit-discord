@@ -24,13 +24,21 @@ class RedditBot:
 
     def handle_new(self):
         """Monitors subreddits"""
-        subs = []
+        sub_names = []
+        sub_colors = {}
         for h in self.config.hooks:
-            subs += h.subreddits
-        if not subs:
+            for s in h.subreddits:
+                if isinstance(s, str):
+                    sub_names.append(s)
+                elif isinstance(s, dict):
+                    name = s.get("name")
+                    sub_names.append(name)
+                    if "color" in s:
+                        sub_colors[name] = s["color"]
+        if not sub_names:
             raise ValueError('There are no subreddits to monitor')
 
-        subs = '+'.join(set(subs))
+        subs = '+'.join(set(sub_names))
         sub = self.reddit.subreddit(subs)
         log.info("Monitoring subreddits: {}".format(subs))
 
@@ -50,7 +58,7 @@ class RedditBot:
                         break
                     for h in self.config.hooks:
                         rgx_match = re.findall(h.regex, c.body)
-                        if (rgx_match and str(c.subreddit) in h.subreddits):
+                        if (rgx_match and str(c.subreddit) in sub_names):
                             comment_time = datetime.datetime.fromtimestamp(c.created_utc, datetime.timezone.utc)
                             log.debug('Criteria was matched ({0}): {1}'.format(comment_time, rgx_match))
                             
@@ -59,7 +67,10 @@ class RedditBot:
                             if (last_time is None) or (comment_time > diff_time):
                                 # Handle the comment
                                 log.info("New comment: {0} ({0.subreddit.display_name})".format(c))
-                                self.handle_comment(c, h)
+                                comment_color = None
+                                if str(post.subreddit) in sub_colors:
+                                    post_color = sub_colors.get(str(c.subreddit))
+                                self.handle_comment(c, h, comment_color)
                             else:
                                 log.debug('Skipping. Comment time was over 10 mins before last check ({0}).'.format(comment_time))
 
@@ -73,7 +84,7 @@ class RedditBot:
                     for h in self.config.hooks:
                         matching_rgx = [c for c in check if re.findall(h.regex, c)]
 
-                        if (matching_rgx and str(post.subreddit) in h.subreddits):  # One or more criteria was matched
+                        if (matching_rgx and str(post.subreddit) in sub_names):  # One or more criteria was matched
                             post_time = datetime.datetime.fromtimestamp(post.created_utc, datetime.timezone.utc)
                             log.debug('Criteria was matched ({0}): {1}'.format(post_time, matching_rgx))
                             
@@ -81,7 +92,10 @@ class RedditBot:
 
                             if (last_time is None) or (post_time > diff_time):
                                 log.info("New post: {0.title} ({0.subreddit.display_name})".format(post))
-                                self.handle_post(post, h)
+                                post_color = None
+                                if str(post.subreddit) in sub_colors:
+                                    post_color = sub_colors.get(str(post.subreddit))
+                                self.handle_post(post, h, post_color)
                             else:
                                 log.debug('Skipping. Post time was over 10 mins before last check ({0}).'.format(post_time))
             
@@ -96,19 +110,19 @@ class RedditBot:
                     log.error("An error occurred: {0}\n".format(e, traceback.format_exc()))
                 self.handle_new()  # Go again
 
-    def handle_post(self, post, hook):
+    def handle_post(self, post, hook, color):
         """Handles an individual post"""
         if hook.url:
-            self.handle_discord(post, hook.url)
+            self.handle_discord(post, hook.url, color)
 
-    def handle_comment(self, comment, hook):
+    def handle_comment(self, comment, hook, color):
         """Handles an individual comment"""
         if hook.url:
-            self.handle_discord(comment, hook.url)
+            self.handle_discord(comment, hook.url, color)
 
-    def handle_discord(self, data, url):
+    def handle_discord(self, data, url, color):
         """Handles the Discord webhooks"""
-        embed = Webhook(url, color=16729344)
+        embed = Webhook(url, color=color or 16729344)  # Default to a light red color if not specified
 
         if isinstance(data, praw.models.Submission):
             p_type = 'Submission'
