@@ -68,8 +68,8 @@ class RedditBot:
                                 # Handle the comment
                                 log.info("New comment: {0} ({0.subreddit.display_name})".format(c))
                                 comment_color = None
-                                if str(post.subreddit) in sub_colors:
-                                    post_color = sub_colors.get(str(c.subreddit))
+                                if str(c.subreddit) in sub_colors:
+                                    comment_color = sub_colors.get(str(c.subreddit))
                                 self.handle_comment(c, h, comment_color)
                             else:
                                 log.debug('Skipping. Comment time was over 10 mins before last check ({0}).'.format(comment_time))
